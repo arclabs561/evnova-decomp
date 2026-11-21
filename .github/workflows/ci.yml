@@ -70,7 +70,11 @@ jobs:
           sudo apt-get install --no-install-recommends -y \
             autoconf autoconf-archive automake libtool libltdl-dev \
             libegl1-mesa-dev libibus-1.0-dev libwayland-dev libx11-dev \
-            libxext-dev libxft-dev libxkbcommon-dev
+            libxext-dev libxft-dev libxkbcommon-dev python3-pil
+
+      - name: Test visual scenario checks
+        if: runner.os == 'Linux'
+        run: /usr/bin/python3 -m unittest discover -s tools -p 'test_scenario_visual.py'
 
       - name: Check out pinned vcpkg
         uses: actions/checkout@v4
