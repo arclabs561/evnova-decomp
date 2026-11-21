@@ -15,6 +15,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from scenario_visual import compare_screenshot
+
 
 class ScenarioError(RuntimeError):
     pass
@@ -582,6 +584,7 @@ def run_step(
         "hold": {"keys", "down"},
         "command": {"cmd", "target", "ship_id", "allow_missing", "commodity", "side", "tons", "max", "timeout_ms", "enabled", "speed_multiplier", "suppress_audio"},
         "screenshot": {"name"},
+        "compare_screenshot": {"reference", "element", "channel_tolerance", "max_changed_pixels"},
         "repeat": {"count", "steps", "until"},
         "decline_mission": {"timeout_ms", "settle_ms"},
         "call": {"scenario", "args"},
@@ -676,6 +679,8 @@ def run_step(
             "/probe/command",
             {key: value for key, value in step.items() if key not in common},
         )
+    elif action == "compare_screenshot":
+        compare_screenshot(probe, step, context.base_dir, artifacts)
     elif action == "screenshot":
         name = str(step.get("name", "screenshot"))
         if Path(name).name != name:

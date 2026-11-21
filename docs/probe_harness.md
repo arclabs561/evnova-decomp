@@ -119,6 +119,38 @@ recheck timer). An offer whose mïsn Flags 0x0004 is set ("can't refuse", e.g.
 the shipped storyline missions) publishes no `decline` element — it must be
 accepted; `decline_mission` will wait out its timeout if one appears.
 
+### Visual checks
+
+A state assertion can tell you that the Spaceport opened. To check what the
+player sees, wait for that state, then compare the rendered frame with a
+reviewed reference. Only visual checks need Pillow (`python -m pip install Pillow`).
+
+```toml
+[[steps]]
+action = "wait"
+expect = { "ui.window" = "spaceport" }
+
+[[steps]]
+action = "compare_screenshot"
+reference = "references/port-kane.png"
+element = "launch"
+```
+
+Use the existing `screenshot` step to capture a full reference frame. Review
+it once and place it relative to the scenario TOML file. Keep captures of
+retail artwork local. Hold the renderer, window dimensions, and UI scale fixed.
+With `element` omitted the check compares the whole frame. Named elements use
+the current layout on both images. Pair a button check with a system or mission
+assertion when different ports share the same button.
+
+The default is exact RGB equality. For animated scenes, prefer a stable
+element. Where variation is expected, `channel_tolerance` sets the largest
+per-channel difference to ignore, and `max_changed_pixels` sets the number of
+pixels allowed above that threshold. A mismatch writes the two crops, a
+magenta overlay, and `visual-diff.json` alongside the usual failure artifacts.
+The JSON crop uses screenshot coordinates. Changed bounds are relative to the
+crop. An image size change fails before pixel comparison.
+
 ### Callable scenario fragments
 
 Any scenario can be invoked as a reusable, parameterized function from another
