@@ -39,12 +39,12 @@ where = { label = "{{ label }}" }
 
 [[steps]]
 action = "wait"
-expect = { "ui.items.*.selected" = true, "ui.items.*.label" = "{{ label }}" }
+expect = { "ui.selected_items.*.label" = "{{ label }}" }
 
 [[steps]]
 action = "click"
 element = "buy"
-trigger = { "ui.items.*.selected" = true, "ui.items.*.label" = "{{ label }}" }
+trigger = { "ui.selected_items.*.label" = "{{ label }}" }
 
 [[steps]]
 action = "wait"

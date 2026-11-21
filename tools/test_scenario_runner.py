@@ -185,6 +185,19 @@ class UiProbe:
         return b""
 
 
+class SelectedRowTest(unittest.TestCase):
+    def test_visible_label_must_belong_to_a_selected_row(self):
+        ui = {"items": [{"label": "Shuttle", "selected": True},
+                        {"label": "Starbridge", "selected": False}]}
+        probe = UiProbe(ui)
+        path = "ui.selected_items.*.label"
+        for selected in (True, False):
+            ui["items"][0]["selected"] = selected
+            observed = runner.observations(probe, {path: None})
+            self.assertFalse(runner.conditions_hold(observed, {path: "Starbridge"}))
+            self.assertEqual(selected, runner.conditions_hold(observed, {path: "Shuttle"}))
+
+
 class WaitAnyTest(unittest.TestCase):
     def _context(self, probe: object) -> runner.RunContext:
         return runner.RunContext(

@@ -48,6 +48,10 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
+      - name: Test scenario runner
+        if: runner.os == 'Linux'
+        run: python3 -m unittest discover -s tools -p 'test_scenario_runner.py'
+
       - name: Test resumable notarization logic
         if: runner.os == 'Linux'
         run: python3 -m unittest discover -s tools -p 'test_notarize_macos.py'

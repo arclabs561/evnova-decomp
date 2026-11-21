@@ -313,7 +313,13 @@ def observations(probe: Probe, expected: dict[str, object]) -> dict[str, object]
     roots = {key.split(".", 1)[0] for key in expected}
     result: dict[str, object] = {}
     if "ui" in roots:
-        result["ui"] = probe.get("/probe/ui")
+        ui = probe.get("/probe/ui")
+        if isinstance(ui, dict) and isinstance(ui.get("items"), list):
+            ui = {**ui, "selected_items": [
+                row for row in ui["items"]
+                if isinstance(row, dict) and row.get("selected") is True
+            ]}
+        result["ui"] = ui
     if "state" in roots:
         result["state"] = probe.get("/probe/state?query=summary")
     if "travel" in roots:

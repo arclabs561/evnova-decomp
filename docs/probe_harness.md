@@ -95,7 +95,9 @@ repeated routes compact; log and diagnostic step labels become dotted
 (`7.3.2`) inside nested iterations.
 
 Path components may use `*` to fan out over a list: `ui.items.*.label` holds
-when any row's label equals the value. A step may carry `trigger` (a table
+when any row's label equals the value. To verify the highlighted row, use
+`ui.selected_items.*.label`. Separate wildcard conditions on the full list
+can match different rows. A step may carry `trigger` (a table
 that must match before the step runs) and `trigger_not` (a table that must not
 match); either failing skips the step, so a route can gate optional actions on
 runtime state (e.g. only hire a class when it is currently offered and the

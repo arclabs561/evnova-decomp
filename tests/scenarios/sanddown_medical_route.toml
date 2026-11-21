@@ -210,14 +210,14 @@ trigger_not = { "ships.escorts.*" = "Terrapin" }
 # click can never hire whatever else happened to be highlighted.
 [[steps.steps]]
 action = "wait"
-expect = { "ui.items.*.selected" = true, "ui.items.*.label" = "Terrapin" }
+expect = { "ui.selected_items.*.label" = "Terrapin" }
 trigger = { "ui.items.*.label" = "Terrapin" }
 trigger_not = { "ships.escorts.*" = "Terrapin" }
 
 [[steps.steps]]
 action = "click"
 element = "buy"
-trigger = { "ui.items.*.label" = "Terrapin" }
+trigger = { "ui.selected_items.*.label" = "Terrapin" }
 trigger_not = { "ships.escorts.*" = "Terrapin" }
 
 [[steps.steps]]
@@ -420,14 +420,14 @@ trigger_not = { "ships.escort_count" = 6 }
 
 [[steps.steps]]
 action = "wait"
-expect = { "ui.items.*.selected" = true, "ui.items.*.label" = "Terrapin" }
+expect = { "ui.selected_items.*.label" = "Terrapin" }
 trigger = { "ui.items.*.label" = "Terrapin" }
 trigger_not = { "ships.escort_count" = 6 }
 
 [[steps.steps]]
 action = "click"
 element = "buy"
-trigger = { "ui.items.*.label" = "Terrapin" }
+trigger = { "ui.selected_items.*.label" = "Terrapin" }
 trigger_not = { "ships.escort_count" = 6 }
 
 [[steps.steps]]
