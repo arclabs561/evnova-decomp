@@ -82,7 +82,9 @@ struct SpriteAsset {
   // Loads a bare rl\x91D sheet where every frame is a full image (ship
   // rotation / engine-glow frames). Returns null on missing/malformed data.
   [[nodiscard]] static std::unique_ptr<SpriteAsset>
-  LoadSheet(SDL_Renderer *renderer, std::uint16_t sheet_id);
+  LoadSheet(SDL_Renderer *renderer,
+            std::uint16_t sheet_id,
+            bool upload_white_silhouettes = true);
 
   // Loads a run of consecutive `cicn` color-icon resources as one frame set:
   // `first_id`, `first_id+1`, ..., `first_id+count-1` each decode to one frame

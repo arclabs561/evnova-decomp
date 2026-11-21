@@ -240,8 +240,10 @@ std::unique_ptr<SpriteAsset> SpriteAsset::LoadSpin(SDL_Renderer *renderer,
   return asset;
 }
 
-std::unique_ptr<SpriteAsset> SpriteAsset::LoadSheet(SDL_Renderer *renderer,
-                                                    std::uint16_t sheet_id) {
+std::unique_ptr<SpriteAsset> SpriteAsset::LoadSheet(
+    SDL_Renderer *renderer,
+    std::uint16_t sheet_id,
+    bool upload_white_silhouettes) {
   const auto sheet_data = NovaResource_Load(kResourceTypeRleSheet16, sheet_id);
   if (!sheet_data) {
     NovaLog::Warn("sprite sheet: no rl.x91D sheet {}", sheet_id);
@@ -253,7 +255,7 @@ std::unique_ptr<SpriteAsset> SpriteAsset::LoadSheet(SDL_Renderer *renderer,
     return nullptr;
   }
   auto asset = std::make_unique<SpriteAsset>();
-  if (!UploadSheetTextures(renderer, *sheet, *asset, true)) {
+  if (!UploadSheetTextures(renderer, *sheet, *asset, upload_white_silhouettes)) {
     NovaLog::Warn("sprite sheet {}: texture upload failed", sheet_id);
     return nullptr;
   }

@@ -523,13 +523,15 @@ void LoadShipVisualLayer(SDL_Renderer *renderer,
                          const std::string &display_name,
                          int base_frame_count,
                          SpriteAsset &asset,
-                         bool &present) {
+                         bool &present,
+                         bool upload_white_silhouettes = true) {
   present = image_id > 0;
   if (!present) {
     return;
   }
   if (auto layer = SpriteAsset::LoadSheet(renderer,
-                                          static_cast<std::uint16_t>(image_id));
+                                          static_cast<std::uint16_t>(image_id),
+                                          upload_white_silhouettes);
       layer) {
     asset = std::move(*layer);
     // The original's Sprite_CreateFromSpriteSheetResources call gives every
@@ -823,27 +825,31 @@ SpaceflightView::ShipSprites(SdlPlatform &platform,
                         entry.alt,
                         entry.has_alt);
   }
+  // Additive draws attenuate the source color directly, even in fog.
   LoadShipVisualLayer(platform.renderer(),
                       visual->engine_glow_image_id,
                       "engine glow",
                       class_label,
                       entry.base.frame_count,
                       entry.glow,
-                      entry.has_glow);
+                      entry.has_glow,
+                      /*upload_white_silhouettes=*/false);
   LoadShipVisualLayer(platform.renderer(),
                       visual->light_image_id,
                       "running lights",
                       class_label,
                       entry.base.frame_count,
                       entry.light,
-                      entry.has_light);
+                      entry.has_light,
+                      /*upload_white_silhouettes=*/false);
   LoadShipVisualLayer(platform.renderer(),
                       visual->weapon_image_id,
                       "weapon effects",
                       class_label,
                       entry.base.frame_count,
                       entry.weapon,
-                      entry.has_weapon);
+                      entry.has_weapon,
+                      /*upload_white_silhouettes=*/false);
   LoadShipVisualLayer(platform.renderer(),
                       visual->shield_image_id,
                       "shield bubble",

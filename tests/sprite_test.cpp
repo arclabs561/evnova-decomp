@@ -6,6 +6,8 @@
 #include <memory>
 #include <vector>
 
+#include "brgr_archive.hpp"
+#include "game/ship_visual.hpp"
 #include "game/sprite_world.hpp"
 #include "sdl_platform.hpp"
 
@@ -37,6 +39,36 @@ TEST_CASE("Sprite_AnchorToScreen centres a centred-anchor frame",
       Sprite_AnchorToScreen(0.0F, 0.0F, 0.0F, 0.0F, 640, 400, ax, ay);
   CHECK(p.screen_x == Catch::Approx(640.0F / 2.0F - ax));
   CHECK(p.screen_y == Catch::Approx(400.0F / 2.0F - ay));
+}
+
+TEST_CASE("additive ship sheets omit the white silhouette", "[sprite][scenario]") {
+  const auto resource = NovaResource_Load(kShipVisualResourceType, 0x80);
+  if (!resource) {
+    SKIP("stock Shuttle sprite data is not installed");
+  }
+  const auto shuttle = DecodeShipVisualDescriptor(*resource);
+  REQUIRE(shuttle);
+  REQUIRE(shuttle->engine_glow_image_id > 0);
+  const auto id = static_cast<std::uint16_t>(shuttle->engine_glow_image_id);
+  std::unique_ptr<SDL_Surface, decltype(&SDL_DestroySurface)> surface{
+      SDL_CreateSurface(64, 64, SDL_PIXELFORMAT_RGBA32), SDL_DestroySurface};
+  REQUIRE(surface);
+  std::unique_ptr<SDL_Renderer, decltype(&SDL_DestroyRenderer)> renderer{
+      SDL_CreateSoftwareRenderer(surface.get()), SDL_DestroyRenderer};
+  REQUIRE(renderer);
+
+  const auto normal = SpriteAsset::LoadSheet(renderer.get(), id);
+  const auto additive = SpriteAsset::LoadSheet(
+      renderer.get(), id, /*upload_white_silhouettes=*/false);
+  REQUIRE(normal);
+  REQUIRE(additive);
+  REQUIRE_FALSE(normal->frames.empty());
+  REQUIRE(additive->frames.size() == normal->frames.size());
+  for (std::size_t i = 0; i < additive->frames.size(); ++i) {
+    CHECK(normal->frames[i].white_silhouette);
+    CHECK(additive->frames[i].texture);
+    CHECK_FALSE(additive->frames[i].white_silhouette);
+  }
 }
 
 // The SpriteAsset DrawSprite overload (the actual ship-layer draw path) must
