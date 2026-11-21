@@ -1,0 +1,8 @@
+# Next tests
+
+1. **Mac quit and resume.** Start with a copy of a disposable pilot on the save branch. Quit from a spaceport through the native application menu. Relaunch and check the saved system, active mission, cargo and credits. Repeat after a purchase inside the Trade Center. Record macOS version, build SHA and quit path.
+2. **Hypergate rendering.** Use a pilot with an unlocked gate. Capture the transition on the same renderer and UI scale before and after the texture change. Check destination state and the white hull transition. Store the pilot and reviewed frames in Drive. An unpatched frame from another renderer is a separate baseline.
+3. **Campaign coverage.** Follow a second faction's stock story, starting with an early Polaris mission if available. Save between missions. Record offer, destination, payout and next offer. Promote any reproducible progression blocker above tooling work.
+4. **Memory follow-up.** Before changing cache lifetime, identify shared sheets among newly encountered classes. Record both live texture bytes and process RSS. Capture the exit status and last game state if a long flight terminates.
+
+For each result record the branch SHA, platform, starting state, exact inputs and observed outcome. For a bug fix, rerun the same case on the parent revision. The existing [probe guide](../probe_harness.md) covers semantic input and the [scenario plan](../scenario_testing_plan.md) describes upstream's harness. Keep generated evidence in Drive and link the relevant code or commit from the queue.

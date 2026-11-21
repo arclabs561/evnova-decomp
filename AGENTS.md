@@ -131,3 +131,17 @@ All Ghidra changes needed for the task are preauthorized, including `confirm:tru
 - `start`/`end` ranges apply to symbols/functions/type methods/xrefs/uses; both required when either is given.
 - The `/operand_search` endpoint supports both disassembly and decompiled context views with `before`/`after` parameters.
 - Struct resizing and field conflicts may require `confirm:true`; its use is preauthorized.
+
+## Fork workflow
+
+Start at [the work queue](docs/fork/README.md) when working on this fork.
+The queue lives on the `fork-work` branch. In a feature worktree, consult
+that branch for planning and follow the implementation instructions in the
+worktree you are changing. Base independent fixes on the upstream revision
+they target. Keep proposed changes on the fork until the owner asks to submit.
+
+Keep captures, visual baselines, game data, pilot files and replay bundles in
+the owner's Google Drive archive. In git, track code, asset-free scenarios,
+test commands, observations and evidence filenames. After a material result,
+update the queue or findings on `fork-work` and record any new evidence in
+the existing Drive review. Keep private Drive URLs out of public commits.
