@@ -519,9 +519,15 @@ def decline_missions(probe: Probe, timeout_ms: int, settle_ms: int) -> int:
     return dismissed
 
 
-def capture_diagnostics(probe: Probe, directory: Path, step_label: str) -> None:
+def capture_diagnostics(
+    probe: Probe, directory: Path, step_label: str, step: object, error: Exception
+) -> None:
     directory.mkdir(parents=True, exist_ok=True)
-    snapshot: dict[str, object] = {"failed_step": step_label}
+    snapshot: dict[str, object] = {
+        "failed_step": step_label,
+        "step": step,
+        "error": str(error),
+    }
     endpoints = {
         "ui": "/probe/ui",
         "state": "/probe/state?query=summary",
@@ -536,7 +542,7 @@ def capture_diagnostics(probe: Probe, directory: Path, step_label: str) -> None:
         except Exception as error:  # Diagnostics must not hide the first failure.
             snapshot[name] = {"diagnostic_error": str(error)}
     (directory / "failure.json").write_text(
-        json.dumps(snapshot, indent=2) + "\n", encoding="utf-8"
+        json.dumps(snapshot, indent=2, default=str) + "\n", encoding="utf-8"
     )
     try:
         (directory / "failure.bmp").write_bytes(probe.screenshot())
@@ -560,7 +566,10 @@ def run_steps(
         except StepFailure:
             raise
         except Exception as error:
-            capture_diagnostics(context.probe, context.artifacts, label)
+            try:
+                capture_diagnostics(context.probe, context.artifacts, label, step, error)
+            except OSError as write_error:
+                print(f"warning: could not write diagnostics: {write_error}", file=sys.stderr)
             raise StepFailure(label, error) from error
 
 

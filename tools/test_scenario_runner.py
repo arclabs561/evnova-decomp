@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Focused regression tests for scenario composition (callable fragments)."""
 
+import json
 import tempfile
 from pathlib import Path
 import unittest
@@ -183,6 +184,28 @@ class UiProbe:
 
     def screenshot(self) -> bytes:
         return b""
+
+
+class FailureReportTest(unittest.TestCase):
+    def test_failed_expectation_survives_unavailable_diagnostics(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            context = runner.RunContext(FakeProbe({"credits": 10}), directory, directory, ())
+            step = {"action": "validate_state", "expect": {"state.credits": 20}}
+            with self.assertRaises(runner.StepFailure) as failure:
+                runner.run_steps(context, [step], 1000)
+            report = json.loads((directory / "failure.json").read_text())
+            self.assertEqual(report["step"], step)
+            self.assertEqual(report["error"], str(failure.exception.error))
+            self.assertIn("state.credits", report["error"])
+            self.assertIn("diagnostic_error", report["ui"])
+
+    def test_unwritable_report_preserves_step_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _write(Path(tmp), "file", "")
+            context = runner.RunContext(FakeProbe({}), path, Path(tmp), ())
+            with self.assertRaisesRegex(runner.StepFailure, "unknown action"):
+                runner.run_steps(context, [{"action": "typo"}], 1000)
 
 
 class WaitAnyTest(unittest.TestCase):
