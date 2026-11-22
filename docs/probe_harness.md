@@ -371,5 +371,8 @@ simulation-time behavior. Disabling acceleration restores audio output.
 
 On Linux, `python3 tools/run_mission_restart.py BINARY INSTALL NEW_OUTPUT`
 runs both mission scenarios in fresh processes against one disposable profile.
-INSTALL contains Nova.rez. The runner waits for a clean exit and a saved pilot
+INSTALL is the extracted Windows Community Edition directory containing Nova.rez.
+The stock Windows 1.0.10 archive also contains this file, but the engine
+loads zero systems from it. Community Edition r4 loads 545 systems.
+The runner waits for a clean exit and a saved pilot
 before relaunching. Each phase has its own log in NEW_OUTPUT.
