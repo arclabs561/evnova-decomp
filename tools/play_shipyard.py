@@ -23,10 +23,11 @@ def play(probe, label, reference, artifacts):
         before = probe.get("/probe/ui")
         trace.append({"before": before})
         target = target_row(before, label)
-        if target.get("selected") is not True:
-            action = {"element": target["name"]}
-            trace.append({"click": action})
-            probe.post("/probe/click", action)
+        if target.get("selected") is True:
+            raise ValueError(f"{label!r} is already selected; start with a different hull")
+        action = {"element": target["name"]}
+        trace.append({"click": action})
+        probe.post("/probe/click", action)
         after = probe.get("/probe/ui")
         trace.append({"after": after})
         row = target_row(after, label)
