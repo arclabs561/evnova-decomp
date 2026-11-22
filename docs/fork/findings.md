@@ -13,3 +13,7 @@ Tests below used stock Community Edition data with the Linux SDL software render
 | Compare an independent Port Kane capture | The Leave button matched exactly. Using Earth as a reference changed 195,654 pixels despite both screens reporting the spaceport state. | `port-comparison.png` and `visual-qa-replay.zip` |
 
 The save branch passed 863 tests in each Linux build configuration. The texture branch passed 864, including its new regression. Each suite skipped two optional pilot-fixture tests. Native Mac gameplay and graphics measurements are still open.
+
+## Live purchase and failed overwrite
+
+[Purchase/restart driver](https://github.com/arclabs561/evnova-decomp/tree/purchase-restart-qa) and [pilot preservation fix](https://github.com/arclabs561/evnova-decomp/tree/preserve-pilot-save). Four Linux game runs used disposable stock pilots. With the quit fix alone, ten tons of Food and 24,400 credits loaded after a normal quit at Ryll. A 4,096-byte process file limit applied immediately before quitting at Moonview truncated the existing 86,120-byte pilot and the next process had no active pilot. Adding staged replacement preserved the previous file byte-for-byte under that limit and restored the initial 25,000 credits and empty holds. Its successful control restored ten tons and 24,250 credits at Moonview. Drive evidence: `trade-restart-live.zip`. Native Mac and Windows replacement, file metadata preservation and abrupt power loss remain unverified.
