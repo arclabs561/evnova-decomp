@@ -1255,9 +1255,25 @@ bool PilotFileSaveGame(const std::filesystem::path &pilots_dir,
   const std::vector<std::byte> bytes =
       PilotFileSerialize(record, jump_dest_stellar);
   const std::filesystem::path path = pilots_dir / (record.pilot_name + ".plt");
+  std::error_code error;
+  const auto original = std::filesystem::symlink_status(path, error);
+  const bool exists = std::filesystem::exists(original);
+  if (error && error != std::errc::no_such_file_or_directory) {
+    NovaLog::Error("pilot save: could not inspect '{}': {}", path.string(),
+                   error.message());
+    return false;
+  }
+  if (exists) {
+    // A rename can succeed even when opening the old pilot for writing would
+    // fail. Check the original without truncating it. Leave links untouched.
+    if (!std::filesystem::is_regular_file(original) ||
+        !std::ofstream(path, std::ios::binary | std::ios::app)) {
+      NovaLog::Error("pilot save: cannot overwrite '{}'", path.string());
+      return false;
+    }
+  }
   // Reserve a private staging name in the same filesystem. An interrupted
   // save can leave a staging directory behind; a later save can pass it.
-  std::error_code error;
   auto staging = path;
   for (unsigned index = 0;; ++index) {
     staging = path;
@@ -1274,10 +1290,15 @@ bool PilotFileSaveGame(const std::filesystem::path &pilots_dir,
 
   const auto pending = staging / "pilot";
   std::ofstream file(pending, std::ios::binary);
-  file.write(reinterpret_cast<const char *>(bytes.data()),
-             static_cast<std::streamsize>(bytes.size()));
+  if (file && exists) {
+    std::filesystem::permissions(pending, original.permissions(), error);
+  }
+  if (!error) {
+    file.write(reinterpret_cast<const char *>(bytes.data()),
+               static_cast<std::streamsize>(bytes.size()));
+  }
   file.close();
-  if (file) {
+  if (file && !error) {
     std::filesystem::rename(pending, path, error);
   }
   const bool replaced = file && !error;

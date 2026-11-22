@@ -466,6 +466,39 @@ TEST_CASE("PilotFile normalizes invalid negative escort commands") {
          std::array<std::int16_t, 4>{-1, -1, 0, 3}));
 }
 
+TEST_CASE("overwriting a pilot respects its file permissions", "[pilot-overwrite]") {
+  namespace fs = std::filesystem;
+  const auto nonce = std::chrono::steady_clock::now().time_since_epoch().count();
+  TemporaryDirectory dir{fs::temp_directory_path() /
+                         ("nova-overwrite-" + std::to_string(nonce))};
+  REQUIRE(fs::create_directory(dir.path));
+  const ScopedSupportDirectoryOverride support{dir.path / "support"};
+  game::GameState state;
+  state.pilot.first_name = "Test";
+  state.player.credits = 100;
+  REQUIRE(PilotFileSaveGame(dir.path, state, 0));
+  const auto path = dir.path / "Test.plt";
+  fs::permissions(path, fs::perms::owner_read | fs::perms::owner_write);
+  const auto original_mode = fs::status(path).permissions();
+  state.player.credits = 200;
+  REQUIRE(PilotFileSaveGame(dir.path, state, 0));
+  CHECK(fs::status(path).permissions() == original_mode);
+
+  const auto read_bytes = [&path]() {
+    std::ifstream input(path, std::ios::binary);
+    return std::string(std::istreambuf_iterator<char>(input), {});
+  };
+  const auto saved = read_bytes();
+  REQUIRE_FALSE(saved.empty());
+  fs::permissions(path, fs::perms::owner_read);
+  if (!std::ofstream(path, std::ios::binary | std::ios::app)) {
+    state.player.credits = 300;
+    CHECK_FALSE(PilotFileSaveGame(dir.path, state, 0));
+    CHECK(read_bytes() == saved);
+  }
+  fs::permissions(path, original_mode);
+}
+
 TEST_CASE("PilotFile .plt round-trips through a real file and derives the "
           "pilot name from the path") {
   const auto dir = std::filesystem::temp_directory_path() / "evnova_pilot_test";
