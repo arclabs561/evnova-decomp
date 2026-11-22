@@ -1255,16 +1255,38 @@ bool PilotFileSaveGame(const std::filesystem::path &pilots_dir,
   const std::vector<std::byte> bytes =
       PilotFileSerialize(record, jump_dest_stellar);
   const std::filesystem::path path = pilots_dir / (record.pilot_name + ".plt");
-  std::ofstream file(path, std::ios::binary | std::ios::trunc);
-  if (!file) {
-    NovaLog::Error("pilot save: could not open '{}' for writing",
-                   path.string());
-    return false;
+  // Reserve a private staging name in the same filesystem. An interrupted
+  // save can leave a staging directory behind; a later save can pass it.
+  std::error_code error;
+  auto staging = path;
+  for (unsigned index = 0;; ++index) {
+    staging = path;
+    staging += ".saving-" + std::to_string(index);
+    if (std::filesystem::create_directory(staging, error)) {
+      break;
+    }
+    if (error && error != std::errc::file_exists) {
+      NovaLog::Error("pilot save: could not stage '{}': {}", path.string(),
+                     error.message());
+      return false;
+    }
   }
+
+  const auto pending = staging / "pilot";
+  std::ofstream file(pending, std::ios::binary);
   file.write(reinterpret_cast<const char *>(bytes.data()),
              static_cast<std::streamsize>(bytes.size()));
-  if (!file) {
-    NovaLog::Error("pilot save: short write to '{}'", path.string());
+  file.close();
+  if (file) {
+    std::filesystem::rename(pending, path, error);
+  }
+  const bool replaced = file && !error;
+  if (!replaced) {
+    NovaLog::Error("pilot save: could not replace '{}'", path.string());
+    std::filesystem::remove(pending, error);
+  }
+  std::filesystem::remove(staging, error);
+  if (!replaced) {
     return false;
   }
   NovaLog::Debug(
