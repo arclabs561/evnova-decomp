@@ -368,3 +368,8 @@ output while accelerated. Suppression happens in the audio backends. SFX
 still create logical voices timed by the gameplay clock, so hyperspace's
 warp-up completion gate and no-stack sound checks retain their normal
 simulation-time behavior. Disabling acceleration restores audio output.
+
+On Linux, `python3 tools/run_mission_restart.py BINARY INSTALL NEW_OUTPUT`
+runs both mission scenarios in fresh processes against one disposable profile.
+INSTALL contains Nova.rez. The runner waits for a clean exit and a saved pilot
+before relaunching. Each phase has its own log in NEW_OUTPUT.
